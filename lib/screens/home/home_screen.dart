@@ -6,7 +6,8 @@ import '../../widgets/common/promo_banner_carousel.dart';
 import '../../widgets/common/category_chips.dart';
 import '../../widgets/common/shimmer_widgets.dart';
 import '../../widgets/product/product_card.dart';
-import '../../widgets/nutrition/nutrition_tip_banner.dart';
+
+import '../products/products_screen.dart';
 
 const _primary = Color(0xFF2E7D32);
 const _primaryLight = Color(0xFF4CAF50);
@@ -120,19 +121,33 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 28),
 
                   // ── Featured / Best Sellers ──────────────────────────────
-                  _buildSectionHeader('Best Sellers ⭐', onSeeAll: () {}),
+                  _buildSectionHeader('Best Sellers ⭐', onSeeAll: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ProductsScreen(),
+                      ),
+                    );
+                  }),
                   const SizedBox(height: 14),
                   _buildHorizontalProductList(),
 
                   const SizedBox(height: 28),
 
                   // ── Nutrition Tip Banner ─────────────────────────────────
-                  const NutritionTipBanner(),
+                  
 
-                  const SizedBox(height: 28),
+              
 
                   // ── New Arrivals Grid ────────────────────────────────────
-                  _buildSectionHeader('New Arrivals 🆕', onSeeAll: () {}),
+                  _buildSectionHeader('New Arrivals 🆕', onSeeAll: () {
+                     Navigator.push(
+                    context,
+                   MaterialPageRoute(
+                  builder: (context) => const ProductsScreen(),
+                ),
+               );
+                  }),
                   const SizedBox(height: 14),
                   _buildProductGrid(),
 
@@ -543,7 +558,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // ─── Helpers ──────────────────────────────────────────────────────────────
 
   void _goToDetail(BuildContext ctx, Product product) {
-    Navigator.push(ctx, MaterialPageRoute(builder: (_) => ProductDetailPage(product: product)));
+    Navigator.push(ctx, MaterialPageRoute(builder: (_) => ProductDetailScreen(product: product)));
   }
 
   Widget _buildError() {

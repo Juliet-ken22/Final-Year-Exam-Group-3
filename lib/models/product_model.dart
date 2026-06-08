@@ -3,8 +3,11 @@ class Product {
   final String name;
   final String formattedPrice;
   final String? image;
-  final String? description;      // ← add this
-  final String? category;         // ← add this
+  final String? description;
+  final String? category;
+  final double? rating;
+  final int? reviewCount;
+  final bool inStock;
 
   Product({
     required this.id,
@@ -13,16 +16,22 @@ class Product {
     this.image,
     this.description,
     this.category,
+    this.rating,
+    this.reviewCount,
+    this.inStock = true,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
       id: json['id'],
       name: json['name'],
-      formattedPrice: json['formatted_price'],
-      image: json['main_image'],           // ← main_image from API
-      description: json['short_description'], // ← use short_description
-      category: json['category']?['name'],    // ← nested category object
+      formattedPrice: json['formatted_price'] ?? '',
+      image: json['main_image'],
+      description: json['short_description'],
+      category: json['category']?['name'],
+      rating: double.tryParse(json['rating']?.toString() ?? ''),
+      reviewCount: json['review_count'] ?? json['reviews_count'],
+      inStock: json['in_stock'] ?? json['stock'] != 0,
     );
   }
 

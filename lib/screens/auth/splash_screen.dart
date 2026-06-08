@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import 'login_screen.dart';
-import '../home/home_screen.dart';
+import '../main_navigation_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -33,7 +34,6 @@ class _SplashScreenState extends State<SplashScreen>
       duration: const Duration(milliseconds: 1800),
     );
 
-    // Logo scales up from small
     _logoScale = Tween<double>(begin: 0.4, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
@@ -41,7 +41,6 @@ class _SplashScreenState extends State<SplashScreen>
       ),
     );
 
-    // Logo fades in
     _logoFade = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
@@ -49,7 +48,6 @@ class _SplashScreenState extends State<SplashScreen>
       ),
     );
 
-    // Brand name slides up and fades in
     _textFade = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
@@ -57,15 +55,16 @@ class _SplashScreenState extends State<SplashScreen>
       ),
     );
 
-    _textSlide = Tween<Offset>(begin: const Offset(0, 0.4), end: Offset.zero)
-        .animate(
-          CurvedAnimation(
-            parent: _controller,
-            curve: const Interval(0.4, 0.7, curve: Curves.easeOut),
-          ),
-        );
+    _textSlide = Tween<Offset>(
+      begin: const Offset(0, 0.4),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.4, 0.7, curve: Curves.easeOut),
+      ),
+    );
 
-    // Tagline fades in last
     _taglineFade = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
@@ -77,13 +76,11 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _navigate() async {
-    // Wait for splash to display
     await Future.delayed(const Duration(seconds: 3));
     if (!mounted) return;
 
-    // Check if user is already logged in
     final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('auth_token') ?? '';
+    final token = prefs.getString('auth_token');
 
     if (!mounted) return;
 
@@ -91,7 +88,9 @@ class _SplashScreenState extends State<SplashScreen>
       context,
       PageRouteBuilder(
         pageBuilder: (_, __, ___) =>
-            token.isNotEmpty ? const HomeScreen() : const LoginScreen(),
+            (token != null && token.isNotEmpty)
+                ? const MainNavigationScreen()
+                : const LoginScreen(),
         transitionsBuilder: (_, animation, __, child) {
           return FadeTransition(opacity: animation, child: child);
         },
@@ -114,7 +113,11 @@ class _SplashScreenState extends State<SplashScreen>
         height: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF1B4332), Color(0xFF2D6A4F), Color(0xFF40916C)],
+            colors: [
+              Color(0xFF1B4332),
+              Color(0xFF2D6A4F),
+              Color(0xFF40916C),
+            ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -125,7 +128,6 @@ class _SplashScreenState extends State<SplashScreen>
             children: [
               const Spacer(flex: 2),
 
-              // ── Animated Logo ──────────────────────────────────────────
               AnimatedBuilder(
                 animation: _controller,
                 builder: (_, __) => FadeTransition(
@@ -149,8 +151,6 @@ class _SplashScreenState extends State<SplashScreen>
                       child: ClipOval(
                         child: Image.asset(
                           'assets/logo.png',
-                          width: 110,
-                          height: 110,
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -161,7 +161,6 @@ class _SplashScreenState extends State<SplashScreen>
 
               const SizedBox(height: 28),
 
-              // ── Animated Brand Name ────────────────────────────────────
               AnimatedBuilder(
                 animation: _controller,
                 builder: (_, __) => FadeTransition(
@@ -183,7 +182,6 @@ class _SplashScreenState extends State<SplashScreen>
 
               const SizedBox(height: 8),
 
-              // ── Animated Tagline ───────────────────────────────────────
               AnimatedBuilder(
                 animation: _controller,
                 builder: (_, __) => FadeTransition(
@@ -202,7 +200,6 @@ class _SplashScreenState extends State<SplashScreen>
 
               const Spacer(flex: 2),
 
-              // ── Bottom loader ──────────────────────────────────────────
               FadeTransition(
                 opacity: _taglineFade,
                 child: Column(

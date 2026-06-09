@@ -13,9 +13,7 @@ class MainNavigationScreen extends StatefulWidget {
       _MainNavigationScreenState();
 }
 
-class _MainNavigationScreenState
-    extends State<MainNavigationScreen> {
-
+class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = [
@@ -29,40 +27,36 @@ class _MainNavigationScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[_selectedIndex],
-
+      backgroundColor: const Color(0xFFF9FAFB),
+      body: Material(
+        color: const Color(0xFFF9FAFB),
+        child: _pages[_selectedIndex],
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
-
         onTap: (index) {
           setState(() {
             _selectedIndex = index;
           });
         },
-
         type: BottomNavigationBarType.fixed,
-
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',
           ),
-
           BottomNavigationBarItem(
             icon: Icon(Icons.category),
             label: 'Categories',
           ),
-
           BottomNavigationBarItem(
             icon: Icon(Icons.favorite),
             label: 'Wishlist',
           ),
-
           BottomNavigationBarItem(
             icon: Icon(Icons.shopping_cart),
             label: 'Cart',
           ),
-
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Profile',

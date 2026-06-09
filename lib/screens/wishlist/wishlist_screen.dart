@@ -5,30 +5,28 @@ class WishlistScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.favorite_border,
-              size: 80,
-              color: Colors.grey,
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.favorite_border,
+            size: 80,
+            color: Colors.grey,
+          ),
+          SizedBox(height: 16),
+          Text(
+            'Your Wishlist is Empty',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
             ),
-            SizedBox(height: 16),
-            Text(
-              'Your Wishlist is Empty',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Products you save will appear here.',
-            ),
-          ],
-        ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            'Products you save will appear here.',
+          ),
+        ],
       ),
     );
   }

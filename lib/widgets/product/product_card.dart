@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/cart_provider.dart';
 import '../../models/product_model.dart';
 
 const _primary = Color(0xFF2E7D32);
@@ -133,16 +135,31 @@ class ProductCard extends StatelessWidget {
                           color: _primary,
                         ),
                       ),
-                      Container(
-                        padding: const EdgeInsets.all(5),
-                        decoration: BoxDecoration(
-                          color: _primary.withOpacity(0.08),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(
-                          Icons.add_shopping_cart_rounded,
-                          size: 14,
-                          color: _primary,
+                      GestureDetector(
+                        onTap: () {
+                          context.read().addProduct(product);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('${product.name} added to cart!'),
+                              backgroundColor: _primary,
+                              duration: const Duration(seconds: 1),
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              margin: const EdgeInsets.all(16),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(5),
+                          decoration: BoxDecoration(
+                            color: _primary.withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.add_shopping_cart_rounded,
+                            size: 14,
+                            color: _primary,
+                          ),
                         ),
                       ),
                     ],

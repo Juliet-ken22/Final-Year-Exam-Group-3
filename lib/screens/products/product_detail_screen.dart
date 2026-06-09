@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/cart_provider.dart';
 import '../../models/product_model.dart';
 
 const _primary = Color(0xFF2E7D32);
@@ -25,8 +27,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   Future<void> _handleAddToCart() async {
     setState(() => _isAddingToCart = true);
-    // TODO: wire to CartService.addToCart(product.id, _quantity)
-    await Future.delayed(const Duration(milliseconds: 800));
+
+    // ✅ Add to CartProvider
+    final cart = context.read<CartProvider>();
+    for (int i = 0; i < _quantity; i++) {
+      cart.addProduct(product);
+    }
+
+    await Future.delayed(const Duration(milliseconds: 400));
     if (!mounted) return;
     setState(() => _isAddingToCart = false);
 
@@ -52,9 +60,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         action: SnackBarAction(
           label: 'View Cart',
           textColor: Colors.white,
-          onPressed: () {
-            // TODO: navigate to cart
-          },
+          onPressed: () => Navigator.pop(context),
         ),
       ),
     );

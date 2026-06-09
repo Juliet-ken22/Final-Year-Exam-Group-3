@@ -25,6 +25,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocus = FocusNode();
   List<Product>? _allProducts;
   List<Product> _filteredProducts = [];
   bool _isLoading = false;
@@ -40,12 +41,16 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _searchFocus.dispose();
     super.dispose();
   }
 
   Future<void> _loadProducts() async {
     if (!mounted) return;
-    setState(() { _isLoading = true; _errorMessage = ''; });
+    setState(() {
+      _isLoading = true;
+      _errorMessage = '';
+    });
     try {
       final products = await ProductService().fetchProducts();
       if (!mounted) return;
@@ -56,7 +61,10 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     } catch (e) {
       if (!mounted) return;
-      setState(() { _errorMessage = e.toString(); _isLoading = false; });
+      setState(() {
+        _errorMessage = e.toString();
+        _isLoading = false;
+      });
     }
   }
 
@@ -137,8 +145,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ─── App Bar ──────────────────────────────────────────────────────────────
-
   Widget _buildAppBar() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -176,7 +182,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    const Icon(Icons.notifications_outlined, size: 22, color: _textDark),
+                    const Icon(Icons.notifications_outlined,
+                        size: 22, color: _textDark),
                     Positioned(
                       top: 8, right: 8,
                       child: Container(
@@ -209,35 +216,50 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ─── Search Bar ───────────────────────────────────────────────────────────
-
+  // ✅ Material wraps TextField directly — fixes "No Material widget found"
   Widget _buildSearchBar() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
         children: [
           Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: const Color(0xFFE0E0E0), width: 1.5),
-              ),
+            child: Material(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
               child: TextField(
                 controller: _searchController,
+                focusNode: _searchFocus,
                 style: const TextStyle(fontSize: 14, color: _textDark),
                 decoration: InputDecoration(
                   hintText: 'Search products, categories...',
-                  hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
-                  prefixIcon: const Icon(Icons.search_rounded, color: _textDark, size: 20),
+                  hintStyle:
+                      TextStyle(color: Colors.grey.shade400, fontSize: 14),
+                  prefixIcon: const Icon(Icons.search_rounded,
+                      color: _textDark, size: 20),
                   suffixIcon: _searchController.text.isNotEmpty
                       ? IconButton(
-                          icon: const Icon(Icons.clear_rounded, color: Colors.black54, size: 18),
+                          icon: const Icon(Icons.clear_rounded,
+                              color: Colors.black54, size: 18),
                           onPressed: _searchController.clear,
                         )
                       : null,
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: const BorderSide(
+                        color: Color(0xFFE0E0E0), width: 1.5),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: const BorderSide(
+                        color: Color(0xFFE0E0E0), width: 1.5),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide:
+                        const BorderSide(color: _primary, width: 1.5),
+                  ),
+                  contentPadding:
+                      const EdgeInsets.symmetric(vertical: 14),
                 ),
               ),
             ),
@@ -253,9 +275,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ─── Section Header ───────────────────────────────────────────────────────
-
-  Widget _buildSectionHeader(String title, {VoidCallback? onSeeAll, bool showSeeAll = true}) {
+  Widget _buildSectionHeader(String title,
+      {VoidCallback? onSeeAll, bool showSeeAll = true}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
@@ -300,10 +321,11 @@ class _HomeScreenState extends State<HomeScreen> {
   // ─── Product Grid ─────────────────────────────────────────────────────────
 
   Widget _buildProductGrid() {
-    if (_isLoading) return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: const ShimmerProductGrid(count: 4),
-    );
+    if (_isLoading)
+      return const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 20),
+        child: ShimmerProductGrid(count: 4),
+      );
     if (_errorMessage.isNotEmpty) return _buildError();
     final products = (_allProducts ?? []).reversed.take(4).toList();
     if (products.isEmpty) return _buildEmpty();
@@ -325,8 +347,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
-  // ─── Search Results ───────────────────────────────────────────────────────
 
   Widget _buildSearchResults() {
     return Padding(
@@ -365,8 +385,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
-  // ─── Quick Actions ────────────────────────────────────────────────────────
 
   Widget _buildQuickActions() {
     final actions = [
@@ -417,10 +435,10 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ─── Helpers ──────────────────────────────────────────────────────────────
-
   void _goToDetail(BuildContext ctx, Product product) {
-    Navigator.push(ctx, MaterialPageRoute(builder: (_) => ProductDetailScreen(product: product)));
+    Navigator.push(ctx,
+        MaterialPageRoute(
+            builder: (_) => ProductDetailScreen(product: product)));
   }
 
   Widget _buildError() {
@@ -460,8 +478,11 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Container(
               padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(color: Colors.grey.withOpacity(0.08), shape: BoxShape.circle),
-              child: Icon(Icons.search_off_rounded, size: 52, color: Colors.grey.shade400),
+              decoration: BoxDecoration(
+                  color: Colors.grey.withOpacity(0.08),
+                  shape: BoxShape.circle),
+              child: Icon(Icons.search_off_rounded,
+                  size: 52, color: Colors.grey.shade400),
             ),
             const SizedBox(height: 16),
             const Text('No products found',
@@ -478,7 +499,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 backgroundColor: _primaryLight,
                 foregroundColor: Colors.white,
                 elevation: 0,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
               ),
             ),
           ],

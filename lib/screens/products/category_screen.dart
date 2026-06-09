@@ -78,28 +78,42 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: const Color(0xFFF9FAFB),
-      child: SafeArea(
+    return Scaffold(
+      backgroundColor: const Color(0xFFF9FAFB),
+      body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── App Bar (no back button — this is a root tab) ──────────
+            // ── App Bar ────────────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text('Categories',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: _textDark)),
-                  SizedBox(height: 2),
-                  Text('Browse by product type',
-                      style: TextStyle(fontSize: 13, color: _textLight)),
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: _border),
+                      ),
+                      child: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: _textDark),
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Categories', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: _textDark)),
+                      Text('Browse by product type', style: TextStyle(fontSize: 12, color: _textLight)),
+                    ],
+                  ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 20),
+          const SizedBox(height: 20),
 
             // ── Featured Banner ────────────────────────────────────────
             Padding(
@@ -121,22 +135,20 @@ class _CategoryScreenState extends State<CategoryScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('All Products',
-                              style: TextStyle(color: Colors.white70, fontSize: 12)),
+                          const Text('All Products', style: TextStyle(color: Colors.white70, fontSize: 12)),
                           const SizedBox(height: 4),
-                          const Text('Browse everything',
-                              style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800)),
+                          const Text('Browse everything', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800)),
                           const SizedBox(height: 12),
                           GestureDetector(
                             onTap: () => Navigator.push(context,
-                                MaterialPageRoute(builder: (_) => const ProductListScreen())),
+                              MaterialPageRoute(builder: (_) => const ProductListScreen())),
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                               decoration: BoxDecoration(
-                                  color: Colors.white, borderRadius: BorderRadius.circular(20)),
-                              child: const Text('Shop All',
-                                  style: TextStyle(color: Color(0xFF1B4332),
-                                      fontSize: 12, fontWeight: FontWeight.w700)),
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: const Text('Shop All', style: TextStyle(color: Color(0xFF1B4332), fontSize: 12, fontWeight: FontWeight.w700)),
                             ),
                           ),
                         ],
@@ -148,18 +160,24 @@ class _CategoryScreenState extends State<CategoryScreen> {
               ),
             ),
 
-            const SizedBox(height: 24),
+          const SizedBox(height: 24),
 
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Text(
-                _isLoading ? 'Loading categories...' : '${_categories.length} categories',
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: _textLight),
-              ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Text(
+              _isLoading
+                  ? 'Loading categories...'
+                  : '${_categories.length} categories',
+              style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: _textLight),
             ),
+          ),
 
-            const SizedBox(height: 12),
+          const SizedBox(height: 12),
 
+            // ── Grid ───────────────────────────────────────────────────
             Expanded(
               child: RefreshIndicator(
                 color: _primary,
@@ -222,16 +240,17 @@ class _CategoryScreenState extends State<CategoryScreen> {
           children: [
             const Icon(Icons.wifi_off_rounded, size: 52, color: Colors.grey),
             const SizedBox(height: 16),
-            const Text('Failed to load categories',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: _textDark)),
+            const Text('Failed to load categories', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: _textDark)),
             const SizedBox(height: 20),
             ElevatedButton.icon(
               onPressed: _loadCategories,
               icon: const Icon(Icons.refresh_rounded),
               label: const Text('Try Again'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: _primary, foregroundColor: Colors.white,
-                elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                backgroundColor: _primary,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
           ],
@@ -240,10 +259,14 @@ class _CategoryScreenState extends State<CategoryScreen> {
     );
   }
 
-  Widget _buildEmpty() => const Center(
-    child: Text('No categories found.', style: TextStyle(color: _textLight, fontSize: 14)),
-  );
+  Widget _buildEmpty() {
+    return const Center(
+      child: Text('No categories found.', style: TextStyle(color: _textLight, fontSize: 14)),
+    );
+  }
 }
+
+// ─── Category Card ────────────────────────────────────────────────────────────
 
 class _CategoryCard extends StatelessWidget {
   final _CategoryItem item;
@@ -259,7 +282,12 @@ class _CategoryCard extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: const Color(0xFFE0E0E0), width: 1.5),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 8, offset: const Offset(0, 4))],
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black.withOpacity(0.03),
+                blurRadius: 8,
+                offset: const Offset(0, 4))
+          ],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -270,12 +298,15 @@ class _CategoryCard extends StatelessWidget {
               child: Icon(item.icon, color: item.color, size: 28),
             ),
             const SizedBox(height: 12),
-            Text(item.name, textAlign: TextAlign.center, maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: _textDark)),
+            Text(
+              item.name,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: _textDark),
+            ),
             const SizedBox(height: 4),
-            Text('View products →',
-                style: TextStyle(fontSize: 11, color: item.color, fontWeight: FontWeight.w600)),
+            Text('View products →', style: TextStyle(fontSize: 11, color: item.color, fontWeight: FontWeight.w600)),
           ],
         ),
       ),

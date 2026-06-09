@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/cart_provider.dart';
 import '../../models/cart_model.dart';
+import 'checkout_screen.dart';
 
 const _primary = Color(0xFF2E7D32);
 const _primaryLight = Color(0xFF4CAF50);

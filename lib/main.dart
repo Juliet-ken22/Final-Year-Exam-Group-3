@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'screens/auth/splash_screen.dart'; // ← changed
+import 'screens/auth/splash_screen.dart';
+import 'screens/main_navigation_screen.dart'; // Add this import
 
 void main() {
   runApp(const MyApp());
@@ -23,7 +24,7 @@ class MyApp extends StatelessWidget {
           elevation: 0,
         ),
       ),
-      home: const SplashScreen(), // ← changed
+      home: const SplashScreen(),
     );
   }
 }

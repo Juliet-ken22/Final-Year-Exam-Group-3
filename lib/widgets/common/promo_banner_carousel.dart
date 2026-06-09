@@ -38,9 +38,10 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min, // Add this to prevent overflow
       children: [
         SizedBox(
-          height: 180,
+          height: 160, // Reduced from 180 to prevent overflow
           child: PageView.builder(
             controller: _controller,
             itemCount: sampleBanners.length,
@@ -48,7 +49,7 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
             itemBuilder: (_, i) => _BannerCard(banner: sampleBanners[i]),
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 8), // Reduced from 10
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(
@@ -119,25 +120,26 @@ class _BannerCard extends StatelessWidget {
             bottom: 0,
             child: Center(
               child: Container(
-                width: 80,
-                height: 80,
+                width: 70, // Reduced from 80
+                height: 70, // Reduced from 80
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.12),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(banner.icon, color: Colors.white, size: 40),
+                child: Icon(banner.icon, color: Colors.white, size: 32), // Reduced from 40
               ),
             ),
           ),
           // Content
           Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(16), // Reduced from 20
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min, // Add this to prevent overflow
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3), // Reduced padding
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(20),
@@ -146,35 +148,39 @@ class _BannerCard extends StatelessWidget {
                     banner.tag,
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 9,
+                      fontSize: 8, // Reduced from 9
                       fontWeight: FontWeight.w700,
-                      letterSpacing: 1.2,
+                      letterSpacing: 1.0,
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6), // Reduced from 8
                 Text(
                   banner.title,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 22,
+                    fontSize: 18, // Reduced from 22
                     fontWeight: FontWeight.w800,
-                    height: 1.15,
+                    height: 1.1,
                     letterSpacing: -0.5,
                   ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 3), // Reduced from 4
                 Text(
                   banner.subtitle,
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.8),
-                    fontSize: 11,
-                    height: 1.5,
+                    fontSize: 10, // Reduced from 11
+                    height: 1.3,
                   ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8), // Reduced from 12
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5), // Reduced padding
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(20),
@@ -183,7 +189,7 @@ class _BannerCard extends StatelessWidget {
                     banner.ctaText,
                     style: TextStyle(
                       color: banner.bgColor,
-                      fontSize: 11,
+                      fontSize: 10, // Reduced from 11
                       fontWeight: FontWeight.w700,
                     ),
                   ),

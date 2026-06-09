@@ -1,10 +1,8 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'register_screen.dart';
 import '../home/home_screen.dart';
+import 'package:nutriblend/services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -26,8 +24,7 @@ class _LoginScreenState extends State<LoginScreen>
   late Animation<double> _fadeAnim;
   late Animation<Offset> _slideAnim;
 
-  static const String _baseUrl =
-      'https://testing.rasmuspharmaceuticals.com/api/v1';
+  final AuthService _authService = AuthService();
 
   @override
   void initState() {
@@ -36,7 +33,8 @@ class _LoginScreenState extends State<LoginScreen>
       vsync: this,
       duration: const Duration(milliseconds: 700),
     );
-    _fadeAnim = CurvedAnimation(parent: _animController, curve: Curves.easeOut);
+    _fadeAnim =
+        CurvedAnimation(parent: _animController, curve: Curves.easeOut);
     _slideAnim = Tween<Offset>(
       begin: const Offset(0, 0.05),
       end: Offset.zero,
@@ -52,81 +50,173 @@ class _LoginScreenState extends State<LoginScreen>
     super.dispose();
   }
 
-  bool _isEmail(String value) {
-    return RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value);
-  }
-
+  // ─── Submit ───────────────────────────────────────────────────────────────
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+
+    // Dismiss keyboard
+    FocusScope.of(context).unfocus();
+
     setState(() => _isLoading = true);
 
-    try {
-      final input = _contactController.text.trim();
+    final result = await _authService.login(
+      emailOrContact: _contactController.text.trim(),
+      password: _passwordController.text,
+    );
 
-      final Map<String, dynamic> body = {'password': _passwordController.text};
+    if (!mounted) return;
+    setState(() => _isLoading = false);
 
-      if (_isEmail(input)) {
-        body['email'] = input;
-      } else {
-        body['contact'] = input;
-      }
-
-      final response = await http.post(
-        Uri.parse('$_baseUrl/auth/login'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode(body),
-      );
-
-      final data = jsonDecode(response.body);
-
-      if (response.statusCode == 200) {
-        final token =
-            data['token'] ??
-            data['data']?['token'] ??
-            data['access_token'] ??
-            '';
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('token', token);
-
-        if (!mounted) return;
-        _showBar('Welcome back!', error: false);
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
-        );
-      } else {
-        final message = data['message'] ?? 'Login failed. Please try again.';
-        if (!mounted) return;
-        _showBar(message, error: true);
-      }
-    } catch (e) {
+    if (result['success'] == true) {
+      _showBar('Welcome back!', error: false);
+      await Future.delayed(const Duration(milliseconds: 500));
       if (!mounted) return;
-      _showBar(e.toString(), error: true);
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+      );
+    } else {
+      _showBar(result['message'] as String? ?? 'Login failed.', error: true);
     }
   }
 
+  // ─── Forgot Password ──────────────────────────────────────────────────────
+  void _onForgotPassword() {
+    final emailOrContact = _contactController.text.trim();
+    final bool looksLikeEmail =
+        emailOrContact.contains('@') && emailOrContact.isNotEmpty;
+
+    showDialog<void>(
+      context: context,
+      builder: (ctx) {
+        final emailCtrl =
+            TextEditingController(text: looksLikeEmail ? emailOrContact : '');
+        bool sending = false;
+
+        return StatefulBuilder(
+          builder: (ctx, setDialogState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18)),
+              title: Text(
+                'Forgot Password',
+                style: GoogleFonts.playfairDisplay(
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF1A1A2E)),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Enter your email address and we\'ll send you a reset OTP.',
+                    style: GoogleFonts.plusJakartaSans(
+                        fontSize: 13, color: const Color(0xFF6B7280)),
+                  ),
+                  const SizedBox(height: 14),
+                  TextFormField(
+                    controller: emailCtrl,
+                    keyboardType: TextInputType.emailAddress,
+                    style: GoogleFonts.plusJakartaSans(fontSize: 14),
+                    decoration: InputDecoration(
+                      hintText: 'email@example.com',
+                      hintStyle: GoogleFonts.plusJakartaSans(
+                          fontSize: 13, color: const Color(0xFF9CA3AF)),
+                      prefixIcon: const Icon(Icons.email_outlined,
+                          color: Color(0xFF4CAF50), size: 19),
+                      filled: true,
+                      fillColor: const Color(0xFFF8FAF9),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide:
+                            const BorderSide(color: Color(0xFFD1D5DB)),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide:
+                            const BorderSide(color: Color(0xFFD1D5DB)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                            color: Color(0xFF4CAF50), width: 1.8),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: Text('Cancel',
+                      style: GoogleFonts.plusJakartaSans(
+                          color: const Color(0xFF6B7280))),
+                ),
+                ElevatedButton(
+                  onPressed: sending
+                      ? null
+                      : () async {
+                          final email = emailCtrl.text.trim();
+                          if (email.isEmpty || !email.contains('@')) {
+                            return;
+                          }
+                          setDialogState(() => sending = true);
+                          final result = await _authService.forgotPassword(
+                              email: email);
+                          if (!ctx.mounted) return;
+                          Navigator.pop(ctx);
+                          _showBar(
+                            result['message'] as String? ??
+                                (result['success'] == true
+                                    ? 'OTP sent!'
+                                    : 'Failed to send OTP.'),
+                            error: result['success'] != true,
+                          );
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2E7D32),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                    elevation: 0,
+                  ),
+                  child: sending
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                              color: Colors.white, strokeWidth: 2),
+                        )
+                      : Text('Send OTP',
+                          style: GoogleFonts.plusJakartaSans(
+                              fontWeight: FontWeight.w600)),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   void _showBar(String message, {required bool error}) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-          message,
-          style: GoogleFonts.plusJakartaSans(fontSize: 13),
-        ),
-        backgroundColor: error
-            ? const Color(0xFFDC2626)
-            : const Color(0xFF16A34A),
+        content: Text(message,
+            style: GoogleFonts.plusJakartaSans(fontSize: 13)),
+        backgroundColor:
+            error ? const Color(0xFFDC2626) : const Color(0xFF16A34A),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       ),
     );
   }
 
+  // ─── Build ────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -182,17 +272,14 @@ class _LoginScreenState extends State<LoginScreen>
             Text(
               'NutriBlend',
               style: GoogleFonts.playfairDisplay(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF2E7D32),
-              ),
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF2E7D32)),
             ),
             Text(
               'Premium Health & Nutrition',
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 11,
-                color: const Color(0xFF6B7280),
-              ),
+                  fontSize: 11, color: const Color(0xFF6B7280)),
             ),
           ],
         ),
@@ -207,19 +294,16 @@ class _LoginScreenState extends State<LoginScreen>
         Text(
           'Welcome Back',
           style: GoogleFonts.playfairDisplay(
-            fontSize: 30,
-            fontWeight: FontWeight.w700,
-            color: const Color(0xFF1A1A2E),
-            height: 1.15,
-          ),
+              fontSize: 30,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF1A1A2E),
+              height: 1.15),
         ),
         const SizedBox(height: 6),
         Text(
           'Sign in to continue your wellness journey',
           style: GoogleFonts.plusJakartaSans(
-            fontSize: 14,
-            color: const Color(0xFF6B7280),
-          ),
+              fontSize: 14, color: const Color(0xFF6B7280)),
         ),
       ],
     );
@@ -250,11 +334,11 @@ class _LoginScreenState extends State<LoginScreen>
             TextFormField(
               controller: _contactController,
               keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.next,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 14,
-                color: const Color(0xFF1A1A2E),
-                fontWeight: FontWeight.w500,
-              ),
+                  fontSize: 14,
+                  color: const Color(0xFF1A1A2E),
+                  fontWeight: FontWeight.w500),
               decoration: _inputDecoration(
                 hint: 'email@example.com or 07XXXXXXXX',
                 icon: Icons.alternate_email_rounded,
@@ -272,11 +356,12 @@ class _LoginScreenState extends State<LoginScreen>
             TextFormField(
               controller: _passwordController,
               obscureText: _obscurePassword,
+              textInputAction: TextInputAction.done,
+              onFieldSubmitted: (_) => _submit(),
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 14,
-                color: const Color(0xFF1A1A2E),
-                fontWeight: FontWeight.w500,
-              ),
+                  fontSize: 14,
+                  color: const Color(0xFF1A1A2E),
+                  fontWeight: FontWeight.w500),
               decoration: _inputDecoration(
                 hint: 'Enter your password',
                 icon: Icons.lock_outline_rounded,
@@ -297,7 +382,27 @@ class _LoginScreenState extends State<LoginScreen>
                 return null;
               },
             ),
-            const SizedBox(height: 26),
+            // ── Forgot password link ──────────────────────────────────────
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: _onForgotPassword,
+                style: TextButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 0, vertical: 6),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(
+                  'Forgot Password?',
+                  style: GoogleFonts.plusJakartaSans(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF2E7D32)),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
             SizedBox(
               width: double.infinity,
               height: 52,
@@ -306,12 +411,10 @@ class _LoginScreenState extends State<LoginScreen>
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2E7D32),
                   foregroundColor: Colors.white,
-                  disabledBackgroundColor: const Color(
-                    0xFF2E7D32,
-                  ).withOpacity(0.55),
+                  disabledBackgroundColor:
+                      const Color(0xFF2E7D32).withOpacity(0.55),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(13),
-                  ),
+                      borderRadius: BorderRadius.circular(13)),
                   elevation: 0,
                 ),
                 child: _isLoading
@@ -319,17 +422,14 @@ class _LoginScreenState extends State<LoginScreen>
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2.5,
-                        ),
+                            color: Colors.white, strokeWidth: 2.5),
                       )
                     : Text(
                         'Sign In',
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.2,
-                        ),
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.2),
                       ),
               ),
             ),
@@ -347,9 +447,7 @@ class _LoginScreenState extends State<LoginScreen>
           Text(
             "Don't have an account? ",
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 13,
-              color: const Color(0xFF6B7280),
-            ),
+                fontSize: 13, color: const Color(0xFF6B7280)),
           ),
           GestureDetector(
             onTap: () => Navigator.push(
@@ -359,10 +457,9 @@ class _LoginScreenState extends State<LoginScreen>
             child: Text(
               'Register',
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF2E7D32),
-              ),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF2E7D32)),
             ),
           ),
         ],
@@ -374,10 +471,9 @@ class _LoginScreenState extends State<LoginScreen>
     return Text(
       text,
       style: GoogleFonts.plusJakartaSans(
-        fontSize: 13,
-        fontWeight: FontWeight.w600,
-        color: const Color(0xFF1A1A2E),
-      ),
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: const Color(0xFF1A1A2E)),
     );
   }
 
@@ -389,14 +485,13 @@ class _LoginScreenState extends State<LoginScreen>
     return InputDecoration(
       hintText: hint,
       hintStyle: GoogleFonts.plusJakartaSans(
-        fontSize: 13,
-        color: const Color(0xFF9CA3AF),
-      ),
+          fontSize: 13, color: const Color(0xFF9CA3AF)),
       prefixIcon: Icon(icon, color: const Color(0xFF4CAF50), size: 19),
       suffixIcon: suffixIcon,
       filled: true,
       fillColor: const Color(0xFFF8FAF9),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      contentPadding:
+          const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: Color(0xFFD1D5DB)),
@@ -415,7 +510,8 @@ class _LoginScreenState extends State<LoginScreen>
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFDC2626), width: 1.8),
+        borderSide:
+            const BorderSide(color: Color(0xFFDC2626), width: 1.8),
       ),
       errorStyle: GoogleFonts.plusJakartaSans(fontSize: 11),
     );

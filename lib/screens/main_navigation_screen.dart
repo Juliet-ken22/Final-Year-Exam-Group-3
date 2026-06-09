@@ -4,6 +4,7 @@ import 'products/category_screen.dart';
 import 'wishlist/wishlist_screen.dart';
 import 'cart/cart_screen.dart';
 import 'profile/profile_screen.dart';
+import 'products/products_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -15,26 +16,49 @@ class MainNavigationScreen extends StatefulWidget {
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _selectedIndex = 0;
 
+  Widget _getPage(int index) {
+    switch (index) {
+      case 0:
+        return HomeScreen(onNavigateToTab: (i) => setState(() => _selectedIndex = i));
+      case 1:
+        return const ProductsScreen();
+      case 2:
+        return const CategoryScreen();
+      case 3:
+        return const WishlistScreen();
+      case 4:
+        return const CartScreen();
+      case 5:
+        return const ProfileScreen();
+      default:
+        return const SizedBox();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _getPage(_selectedIndex),
-
+      backgroundColor: const Color(0xFFF9FAFB),
+      body: Material(
+        color: const Color(0xFFF9FAFB),
+        child: _getPage(_selectedIndex),
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
-        onTap: (index) {
-          print('Tapped index: $index'); // Debug print
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
+        onTap: (index) => setState(() => _selectedIndex = index),
         type: BottomNavigationBarType.fixed,
-
+        selectedItemColor: const Color(0xFF2E7D32),
+        unselectedItemColor: const Color(0xFF757575),
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),
             activeIcon: Icon(Icons.home_rounded),
             label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.storefront_outlined),
+            activeIcon: Icon(Icons.storefront_rounded),
+            label: 'Products',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.grid_view_outlined),
@@ -59,37 +83,5 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         ],
       ),
     );
-  }
-
-  Widget _getPage(int index) {
-    switch (index) {
-      case 0:
-        return HomeScreen(onNavigateToTab: (tabIndex) {
-          setState(() {
-            _selectedIndex = tabIndex;
-          });
-        });
-      case 1:
-        return const CategoryScreen();
-      case 2:
-        return const WishlistScreen();
-      case 3:
-        return const CartScreen();
-      case 4:
-        return const ProfileScreen();
-      default:
-        return Container(color: Colors.red);
-    }
-  }
-
-  String _getPageName(int index) {
-    switch (index) {
-      case 0: return 'Home Screen';
-      case 1: return 'Categories Screen';
-      case 2: return 'Wishlist Screen';
-      case 3: return 'Cart Screen';
-      case 4: return 'Profile Screen';
-      default: return 'Unknown';
-    }
   }
 }

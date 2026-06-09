@@ -8,13 +8,16 @@ import '../../widgets/common/shimmer_widgets.dart';
 import '../../widgets/product/product_card.dart';
 import '../products/products_screen.dart';
 
-const _primary = Color(0xFF2E7D32);
+const _primary      = Color(0xFF2E7D32);
 const _primaryLight = Color(0xFF4CAF50);
-const _textDark = Color(0xFF1A1A1A);
-const _textLight = Color(0xFF757575);
+const _textDark     = Color(0xFF1A1A1A);
+const _textLight    = Color(0xFF757575);
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  /// Callback so HomeScreen can ask MainNavigationScreen to switch tabs.
+  final void Function(int)? onNavigateToTab;
+
+  const HomeScreen({super.key, this.onNavigateToTab});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -79,77 +82,63 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: RefreshIndicator(
-        color: _primary,
-        onRefresh: _loadProducts,
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildAppBar(),
-              const SizedBox(height: 16),
-              _buildSearchBar(),
-              const SizedBox(height: 20),
-
-              if (_searchController.text.isNotEmpty) ...[
-                _buildSearchResults(),
-              ] else ...[
-                const PromoBannerCarousel(),
+    return Scaffold(
+      backgroundColor: const Color(0xFFF9FAFB),
+      // ── No bottomNavigationBar here — it lives in MainNavigationScreen ──
+      body: SafeArea(
+        child: RefreshIndicator(
+          color: _primary,
+          onRefresh: _loadProducts,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildAppBar(),
+                const SizedBox(height: 16),
+                _buildSearchBar(),
                 const SizedBox(height: 20),
-
-                CategoryChips(
-                  onCategorySelected: (cat) {
-                    setState(() {
-                      _filteredProducts = cat == 'All'
-                          ? (_allProducts ?? [])
-                          : (_allProducts ?? [])
-                              .where((p) =>
-                                  p.category
-                                      ?.toLowerCase()
-                                      .contains(cat.toLowerCase()) ??
-                                  false)
+                if (_searchController.text.isNotEmpty) ...[
+                  _buildSearchResults(),
+                ] else ...[
+                  const PromoBannerCarousel(),
+                  const SizedBox(height: 20),
+                  CategoryChips(
+                    onCategorySelected: (cat) {
+                      if (cat == 'All') {
+                        setState(() => _filteredProducts = _allProducts ?? []);
+                      } else {
+                        setState(() {
+                          _filteredProducts = (_allProducts ?? [])
+                              .where((p) => p.category?.toLowerCase()
+                                  .contains(cat.toLowerCase()) ?? false)
                               .toList();
-                    });
-                  },
-                ),
-
-                const SizedBox(height: 28),
-
-                _buildSectionHeader(
-                  'Best Sellers ⭐',
-                  onSeeAll: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => const ProductsScreen()),
+                        });
+                      }
+                    },
                   ),
-                ),
-                const SizedBox(height: 14),
-                _buildHorizontalProductList(),
-
-                const SizedBox(height: 28),
-
-                _buildSectionHeader(
-                  'New Arrivals 🆕',
-                  onSeeAll: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => const ProductsScreen()),
-                  ),
-                ),
-                const SizedBox(height: 14),
-                _buildProductGrid(),
-
-                const SizedBox(height: 28),
-
-                _buildSectionHeader('Quick Actions', showSeeAll: false),
-                const SizedBox(height: 14),
-                _buildQuickActions(),
-
-                const SizedBox(height: 28),
+                  const SizedBox(height: 28),
+                  _buildSectionHeader('Best Sellers ⭐', onSeeAll: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => const ProductsScreen()));
+                  }),
+                  const SizedBox(height: 14),
+                  _buildHorizontalProductList(),
+                  const SizedBox(height: 28),
+                  _buildSectionHeader('New Arrivals 🆕', onSeeAll: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => const ProductsScreen()));
+                  }),
+                  const SizedBox(height: 14),
+                  _buildProductGrid(),
+                  const SizedBox(height: 28),
+                  _buildSectionHeader('Quick Actions', showSeeAll: false),
+                  const SizedBox(height: 14),
+                  _buildQuickActions(),
+                  const SizedBox(height: 28),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),
@@ -169,35 +158,22 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   const Text('🌿', style: TextStyle(fontSize: 16)),
                   const SizedBox(width: 6),
-                  Text(
-                    'Hello there 👋',
-                    style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: _textLight),
-                  ),
+                  Text('Hello there 👋',
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: _textLight)),
                 ],
               ),
               const SizedBox(height: 2),
-              const Text(
-                'NutriBlend',
-                style: TextStyle(
-                    fontSize: 26,
-                    fontWeight: FontWeight.w800,
-                    color: _textDark,
-                    letterSpacing: -0.5),
-              ),
-              Text(
-                'Quality products for a healthier you',
-                style: TextStyle(fontSize: 12, color: _textLight),
-              ),
+              const Text('NutriBlend',
+                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800,
+                      color: _textDark, letterSpacing: -0.5)),
+              Text('Quality products for a healthier you',
+                  style: TextStyle(fontSize: 12, color: _textLight)),
             ],
           ),
           Row(
             children: [
               Container(
-                width: 42,
-                height: 42,
+                width: 42, height: 42,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
@@ -209,30 +185,29 @@ class _HomeScreenState extends State<HomeScreen> {
                     const Icon(Icons.notifications_outlined,
                         size: 22, color: _textDark),
                     Positioned(
-                      top: 8,
-                      right: 8,
+                      top: 8, right: 8,
                       child: Container(
-                        width: 8,
-                        height: 8,
+                        width: 8, height: 8,
                         decoration: const BoxDecoration(
-                            color: Color(0xFFE53935),
-                            shape: BoxShape.circle),
+                            color: Color(0xFFE53935), shape: BoxShape.circle),
                       ),
                     ),
                   ],
                 ),
               ),
               const SizedBox(width: 10),
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: _primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: _primary.withOpacity(0.2)),
+              // Tapping the avatar navigates to Profile tab (index 4)
+              GestureDetector(
+                onTap: () => widget.onNavigateToTab?.call(4),
+                child: Container(
+                  width: 42, height: 42,
+                  decoration: BoxDecoration(
+                    color: _primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: _primary.withOpacity(0.2)),
+                  ),
+                  child: const Icon(Icons.person_outline_rounded, color: _primary, size: 22),
                 ),
-                child: const Icon(Icons.person_outline_rounded,
-                    color: _primary, size: 22),
               ),
             ],
           ),
@@ -292,11 +267,8 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(width: 12),
           Container(
             padding: const EdgeInsets.all(13),
-            decoration: BoxDecoration(
-                color: _primary,
-                borderRadius: BorderRadius.circular(14)),
-            child: const Icon(Icons.tune_rounded,
-                color: Colors.white, size: 20),
+            decoration: BoxDecoration(color: _primary, borderRadius: BorderRadius.circular(14)),
+            child: const Icon(Icons.tune_rounded, color: Colors.white, size: 20),
           ),
         ],
       ),
@@ -311,23 +283,19 @@ class _HomeScreenState extends State<HomeScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(title,
-              style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: _textDark)),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: _textDark)),
           if (showSeeAll)
             GestureDetector(
               onTap: onSeeAll,
               child: const Text('See All →',
-                  style: TextStyle(
-                      color: _primaryLight,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700)),
+                  style: TextStyle(color: _primaryLight, fontSize: 13, fontWeight: FontWeight.w700)),
             ),
         ],
       ),
     );
   }
+
+  // ─── Horizontal Product List ──────────────────────────────────────────────
 
   Widget _buildHorizontalProductList() {
     if (_isLoading) return const ShimmerHorizontalList();
@@ -350,6 +318,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // ─── Product Grid ─────────────────────────────────────────────────────────
+
   Widget _buildProductGrid() {
     if (_isLoading)
       return const Padding(
@@ -366,10 +336,8 @@ class _HomeScreenState extends State<HomeScreen> {
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: 0.75,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
+          crossAxisCount: 2, childAspectRatio: 0.75,
+          crossAxisSpacing: 12, mainAxisSpacing: 12,
         ),
         itemCount: products.length,
         itemBuilder: (ctx, i) => ProductGridCard(
@@ -390,13 +358,9 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('Results (${_filteredProducts.length})',
-                  style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      color: _textDark)),
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: _textDark)),
               Text('for "${_searchController.text}"',
-                  style:
-                      const TextStyle(color: _textLight, fontSize: 13)),
+                  style: const TextStyle(color: _textLight, fontSize: 13)),
             ],
           ),
           const SizedBox(height: 16),
@@ -406,12 +370,9 @@ class _HomeScreenState extends State<HomeScreen> {
             GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              gridDelegate:
-                  const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.75,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2, childAspectRatio: 0.75,
+                crossAxisSpacing: 12, mainAxisSpacing: 12,
               ),
               itemCount: _filteredProducts.length,
               itemBuilder: (ctx, i) => ProductGridCard(
@@ -427,53 +388,49 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildQuickActions() {
     final actions = [
-      _QuickActionData(Icons.shopping_bag_outlined, 'My Orders', 'Track & manage'),
-      _QuickActionData(Icons.local_offer_outlined, 'Deals', 'Save more'),
-      _QuickActionData(Icons.history_rounded, 'History', 'Quick access'),
-      _QuickActionData(Icons.support_agent_rounded, 'Support', "We're here"),
+      _QuickActionData(Icons.shopping_bag_outlined, 'My Orders', 'Track & manage', null),
+      _QuickActionData(Icons.local_offer_outlined,  'Deals',     'Save more',      null),
+      _QuickActionData(Icons.favorite_outlined,     'Wishlist',  'Saved items',    2),   // → tab 2
+      _QuickActionData(Icons.support_agent_rounded, 'Support',   "We're here",     null),
     ];
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
-        children: actions
-            .map((a) => Expanded(
-                  child: GestureDetector(
-                    onTap: () {},
-                    child: Container(
-                      margin: EdgeInsets.only(
-                          right: a != actions.last ? 10 : 0),
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 14, horizontal: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                            color: const Color(0xFFE0E0E0), width: 1.5),
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(a.icon, color: _primaryLight, size: 26),
-                          const SizedBox(height: 8),
-                          Text(a.label,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                  color: _textDark,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700)),
-                          const SizedBox(height: 2),
-                          Text(a.sub,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                  color: Colors.grey,
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w500)),
-                        ],
-                      ),
-                    ),
-                  ),
-                ))
-            .toList(),
+        children: actions.map((a) {
+          final isLast = a == actions.last;
+          return Expanded(
+            child: GestureDetector(
+              onTap: () {
+                // Wishlist quick-action switches to the Wishlist tab
+                if (a.tabIndex != null) {
+                  widget.onNavigateToTab?.call(a.tabIndex!);
+                }
+              },
+              child: Container(
+                margin: EdgeInsets.only(right: isLast ? 0 : 10),
+                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 4),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: const Color(0xFFE0E0E0), width: 1.5),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(a.icon, color: _primaryLight, size: 26),
+                    const SizedBox(height: 8),
+                    Text(a.label, textAlign: TextAlign.center,
+                        style: const TextStyle(color: _textDark, fontSize: 11, fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 2),
+                    Text(a.sub, textAlign: TextAlign.center,
+                        style: const TextStyle(color: Colors.grey, fontSize: 9, fontWeight: FontWeight.w500)),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }
@@ -493,8 +450,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const Icon(Icons.wifi_off_rounded, size: 40, color: Colors.grey),
             const SizedBox(height: 12),
             Text(_errorMessage,
-                style: const TextStyle(
-                    color: Colors.redAccent, fontSize: 13),
+                style: const TextStyle(color: Colors.redAccent, fontSize: 13),
                 textAlign: TextAlign.center),
             const SizedBox(height: 12),
             TextButton.icon(
@@ -507,15 +463,12 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildEmpty() {
-    return const Center(
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 24),
-        child: Text('No products available.',
-            style: TextStyle(color: Colors.grey)),
-      ),
-    );
-  }
+  Widget _buildEmpty() => const Center(
+    child: Padding(
+      padding: EdgeInsets.symmetric(vertical: 24),
+      child: Text('No products available.', style: TextStyle(color: Colors.grey)),
+    ),
+  );
 
   Widget _buildNoResults() {
     return Center(
@@ -533,14 +486,10 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 16),
             const Text('No products found',
-                style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: _textDark)),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _textDark)),
             const SizedBox(height: 6),
             Text('Try a different search term',
-                style: TextStyle(
-                    color: Colors.grey.shade500, fontSize: 13)),
+                style: TextStyle(color: Colors.grey.shade500, fontSize: 13)),
             const SizedBox(height: 20),
             ElevatedButton.icon(
               onPressed: _searchController.clear,
@@ -565,5 +514,6 @@ class _QuickActionData {
   final IconData icon;
   final String label;
   final String sub;
-  const _QuickActionData(this.icon, this.label, this.sub);
+  final int? tabIndex;
+  const _QuickActionData(this.icon, this.label, this.sub, this.tabIndex);
 }

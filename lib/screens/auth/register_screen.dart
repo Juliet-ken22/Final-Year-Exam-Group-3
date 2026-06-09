@@ -1,9 +1,8 @@
-
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart' as http;
 import 'login_screen.dart';
+import '../home/home_screen.dart';
+import 'package:nutriblend/services/auth_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -28,8 +27,7 @@ class _RegisterScreenState extends State<RegisterScreen>
   late Animation<double> _fadeAnim;
   late Animation<Offset> _slideAnim;
 
-  static const String _baseUrl =
-      'https://testing.rasmuspharmaceuticals.com/api/v1';
+  final AuthService _authService = AuthService();
 
   @override
   void initState() {
@@ -38,13 +36,13 @@ class _RegisterScreenState extends State<RegisterScreen>
       vsync: this,
       duration: const Duration(milliseconds: 700),
     );
-    _fadeAnim = CurvedAnimation(
-        parent: _animController, curve: Curves.easeOut);
+    _fadeAnim =
+        CurvedAnimation(parent: _animController, curve: Curves.easeOut);
     _slideAnim = Tween<Offset>(
       begin: const Offset(0, 0.05),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-        parent: _animController, curve: Curves.easeOut));
+    ).animate(
+        CurvedAnimation(parent: _animController, curve: Curves.easeOut));
     _animController.forward();
   }
 
@@ -58,79 +56,58 @@ class _RegisterScreenState extends State<RegisterScreen>
     super.dispose();
   }
 
-  bool _isEmail(String value) {
-    return RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value);
-  }
-
+  // ─── Submit ───────────────────────────────────────────────────────────────
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+
+    // Dismiss keyboard
+    FocusScope.of(context).unfocus();
+
     setState(() => _isLoading = true);
 
-    try {
-      final input = _contactController.text.trim();
+    final result = await _authService.register(
+      name: _nameController.text.trim(),
+      emailOrContact: _contactController.text.trim(),
+      password: _passwordController.text,
+      passwordConfirmation: _confirmPasswordController.text,
+    );
 
-      final Map<String, dynamic> body = {
-        'name': _nameController.text.trim(),
-        'password': _passwordController.text,
-        'password_confirmation': _confirmPasswordController.text,
-      };
+    if (!mounted) return;
+    setState(() => _isLoading = false);
 
-      if (_isEmail(input)) {
-        body['email'] = input;
-      } else {
-        body['contact'] = input;
-      }
-
-      final response = await http.post(
-        Uri.parse('$_baseUrl/auth/register'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode(body),
-      );
-
-      final data = jsonDecode(response.body);
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        if (!mounted) return;
-        _showBar('Account created successfully. Please log in.', error: false);
-        await Future.delayed(const Duration(seconds: 1));
-        if (!mounted) return;
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const LoginScreen()),
-        );
-      } else {
-        final message =
-            data['message'] ?? 'Registration failed. Please try again.';
-        if (!mounted) return;
-        _showBar(message, error: true);
-      }
-    } catch (e) {
+    if (result['success'] == true) {
+      _showBar('Account created successfully!', error: false);
+      await Future.delayed(const Duration(seconds: 1));
       if (!mounted) return;
-      _showBar(e.toString(), error: true);
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+      );
+    } else {
+      _showBar(
+        result['message'] as String? ?? 'Registration failed. Please try again.',
+        error: true,
+      );
     }
   }
 
   void _showBar(String message, {required bool error}) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-          message,
-          style: GoogleFonts.plusJakartaSans(fontSize: 13),
-        ),
+        content: Text(message,
+            style: GoogleFonts.plusJakartaSans(fontSize: 13)),
         backgroundColor:
             error ? const Color(0xFFDC2626) : const Color(0xFF16A34A),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       ),
     );
   }
 
+  // ─── Build ────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -177,7 +154,8 @@ class _RegisterScreenState extends State<RegisterScreen>
             ),
             borderRadius: BorderRadius.circular(14),
           ),
-          child: const Icon(Icons.eco_rounded, color: Colors.white, size: 24),
+          child:
+              const Icon(Icons.eco_rounded, color: Colors.white, size: 24),
         ),
         const SizedBox(width: 12),
         Column(
@@ -186,17 +164,14 @@ class _RegisterScreenState extends State<RegisterScreen>
             Text(
               'NutriBlend',
               style: GoogleFonts.playfairDisplay(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF2E7D32),
-              ),
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF2E7D32)),
             ),
             Text(
               'Premium Health & Nutrition',
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 11,
-                color: const Color(0xFF6B7280),
-              ),
+                  fontSize: 11, color: const Color(0xFF6B7280)),
             ),
           ],
         ),
@@ -211,19 +186,16 @@ class _RegisterScreenState extends State<RegisterScreen>
         Text(
           'Create Account',
           style: GoogleFonts.playfairDisplay(
-            fontSize: 30,
-            fontWeight: FontWeight.w700,
-            color: const Color(0xFF1A1A2E),
-            height: 1.15,
-          ),
+              fontSize: 30,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF1A1A2E),
+              height: 1.15),
         ),
         const SizedBox(height: 6),
         Text(
           'Fill in the details below to get started',
           style: GoogleFonts.plusJakartaSans(
-            fontSize: 14,
-            color: const Color(0xFF6B7280),
-          ),
+              fontSize: 14, color: const Color(0xFF6B7280)),
         ),
       ],
     );
@@ -256,9 +228,14 @@ class _RegisterScreenState extends State<RegisterScreen>
               hint: 'e.g. Jane Nakato',
               icon: Icons.person_outline_rounded,
               keyboardType: TextInputType.name,
+              textInputAction: TextInputAction.next,
               validator: (v) {
-                if (v == null || v.trim().isEmpty) return 'Full name is required';
-                if (v.trim().length < 2) return 'Enter at least 2 characters';
+                if (v == null || v.trim().isEmpty) {
+                  return 'Full name is required';
+                }
+                if (v.trim().length < 2) {
+                  return 'Enter at least 2 characters';
+                }
                 return null;
               },
             ),
@@ -270,6 +247,7 @@ class _RegisterScreenState extends State<RegisterScreen>
               hint: 'email@example.com or 07XXXXXXXX',
               icon: Icons.alternate_email_rounded,
               keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.next,
               validator: (v) {
                 if (v == null || v.trim().isEmpty) {
                   return 'Email or phone number is required';
@@ -285,11 +263,14 @@ class _RegisterScreenState extends State<RegisterScreen>
               hint: 'Minimum 8 characters',
               icon: Icons.lock_outline_rounded,
               obscure: _obscurePassword,
+              textInputAction: TextInputAction.next,
               toggleObscure: () =>
                   setState(() => _obscurePassword = !_obscurePassword),
               validator: (v) {
                 if (v == null || v.isEmpty) return 'Password is required';
-                if (v.length < 8) return 'Password must be at least 8 characters';
+                if (v.length < 8) {
+                  return 'Password must be at least 8 characters';
+                }
                 return null;
               },
             ),
@@ -301,9 +282,14 @@ class _RegisterScreenState extends State<RegisterScreen>
               hint: 'Re-enter your password',
               icon: Icons.lock_outline_rounded,
               obscure: _obscureConfirm,
+              textInputAction: TextInputAction.done,
+              onFieldSubmitted: (_) => _submit(),
               toggleObscure: () =>
                   setState(() => _obscureConfirm = !_obscureConfirm),
               validator: (v) {
+                if (v == null || v.isEmpty) {
+                  return 'Please confirm your password';
+                }
                 if (v != _passwordController.text) {
                   return 'Passwords do not match';
                 }
@@ -330,17 +316,14 @@ class _RegisterScreenState extends State<RegisterScreen>
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2.5,
-                        ),
+                            color: Colors.white, strokeWidth: 2.5),
                       )
                     : Text(
                         'Create Account',
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.2,
-                        ),
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.2),
                       ),
               ),
             ),
@@ -358,9 +341,7 @@ class _RegisterScreenState extends State<RegisterScreen>
           Text(
             'Already have an account? ',
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 13,
-              color: const Color(0xFF6B7280),
-            ),
+                fontSize: 13, color: const Color(0xFF6B7280)),
           ),
           GestureDetector(
             onTap: () => Navigator.pushReplacement(
@@ -370,10 +351,9 @@ class _RegisterScreenState extends State<RegisterScreen>
             child: Text(
               'Sign In',
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF2E7D32),
-              ),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF2E7D32)),
             ),
           ),
         ],
@@ -385,10 +365,9 @@ class _RegisterScreenState extends State<RegisterScreen>
     return Text(
       text,
       style: GoogleFonts.plusJakartaSans(
-        fontSize: 13,
-        fontWeight: FontWeight.w600,
-        color: const Color(0xFF1A1A2E),
-      ),
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: const Color(0xFF1A1A2E)),
     );
   }
 
@@ -397,6 +376,8 @@ class _RegisterScreenState extends State<RegisterScreen>
     required String hint,
     required IconData icon,
     TextInputType? keyboardType,
+    TextInputAction? textInputAction,
+    ValueChanged<String>? onFieldSubmitted,
     bool obscure = false,
     VoidCallback? toggleObscure,
     String? Function(String?)? validator,
@@ -405,19 +386,19 @@ class _RegisterScreenState extends State<RegisterScreen>
       controller: controller,
       keyboardType: keyboardType,
       obscureText: obscure,
+      textInputAction: textInputAction,
+      onFieldSubmitted: onFieldSubmitted,
       validator: validator,
       style: GoogleFonts.plusJakartaSans(
-        fontSize: 14,
-        color: const Color(0xFF1A1A2E),
-        fontWeight: FontWeight.w500,
-      ),
+          fontSize: 14,
+          color: const Color(0xFF1A1A2E),
+          fontWeight: FontWeight.w500),
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: GoogleFonts.plusJakartaSans(
-          fontSize: 13,
-          color: const Color(0xFF9CA3AF),
-        ),
-        prefixIcon: Icon(icon, color: const Color(0xFF4CAF50), size: 19),
+            fontSize: 13, color: const Color(0xFF9CA3AF)),
+        prefixIcon:
+            Icon(icon, color: const Color(0xFF4CAF50), size: 19),
         suffixIcon: toggleObscure != null
             ? IconButton(
                 icon: Icon(
@@ -444,7 +425,8 @@ class _RegisterScreenState extends State<RegisterScreen>
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF4CAF50), width: 1.8),
+          borderSide:
+              const BorderSide(color: Color(0xFF4CAF50), width: 1.8),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),

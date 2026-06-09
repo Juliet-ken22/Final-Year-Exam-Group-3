@@ -4,54 +4,45 @@ import '../../services/product_service.dart';
 import '../../models/product_model.dart';
 import 'product_list_screen.dart';
 
-const _primary = Color(0xFF2E7D32);
+const _primary      = Color(0xFF2E7D32);
 const _primaryLight = Color(0xFF4CAF50);
-const _textDark = Color(0xFF1A1A1A);
-const _textLight = Color(0xFF757575);
-const _border = Color(0xFFE0E0E0);
+const _textDark     = Color(0xFF1A1A1A);
+const _textLight    = Color(0xFF757575);
+const _border       = Color(0xFFE0E0E0);
 
-// Category display model with icon and color
 class _CategoryItem {
   final String name;
   final IconData icon;
   final Color color;
   final Color bgColor;
-  const _CategoryItem({
-    required this.name,
-    required this.icon,
-    required this.color,
-    required this.bgColor,
-  });
+  const _CategoryItem({required this.name, required this.icon, required this.color, required this.bgColor});
 }
 
-// Map API category names to icons/colors
 _CategoryItem _mapCategory(String name) {
   final lower = name.toLowerCase();
-  if (lower.contains('protein') || lower.contains('whey')) {
+  if (lower.contains('protein') || lower.contains('whey'))
     return _CategoryItem(name: name, icon: Icons.fitness_center_rounded,
         color: const Color(0xFF1565C0), bgColor: const Color(0xFFE3F2FD));
-  } else if (lower.contains('vitamin') || lower.contains('supplement')) {
+  if (lower.contains('vitamin') || lower.contains('supplement'))
     return _CategoryItem(name: name, icon: Icons.local_pharmacy_outlined,
         color: const Color(0xFF6A1B9A), bgColor: const Color(0xFFF3E5F5));
-  } else if (lower.contains('omega') || lower.contains('fish')) {
+  if (lower.contains('omega') || lower.contains('fish'))
     return _CategoryItem(name: name, icon: Icons.water_drop_outlined,
         color: const Color(0xFF00838F), bgColor: const Color(0xFFE0F7FA));
-  } else if (lower.contains('probiotic') || lower.contains('gut')) {
+  if (lower.contains('probiotic') || lower.contains('gut'))
     return _CategoryItem(name: name, icon: Icons.spa_rounded,
         color: const Color(0xFF2E7D32), bgColor: const Color(0xFFE8F5E9));
-  } else if (lower.contains('superfood') || lower.contains('greens')) {
+  if (lower.contains('superfood') || lower.contains('greens'))
     return _CategoryItem(name: name, icon: Icons.eco_rounded,
         color: const Color(0xFF558B2F), bgColor: const Color(0xFFF1F8E9));
-  } else if (lower.contains('bundle') || lower.contains('pack')) {
+  if (lower.contains('bundle') || lower.contains('pack'))
     return _CategoryItem(name: name, icon: Icons.inventory_2_outlined,
         color: const Color(0xFFBF360C), bgColor: const Color(0xFFFBE9E7));
-  } else if (lower.contains('weight') || lower.contains('fat')) {
+  if (lower.contains('weight') || lower.contains('fat'))
     return _CategoryItem(name: name, icon: Icons.monitor_weight_outlined,
         color: const Color(0xFFF57C00), bgColor: const Color(0xFFFFF3E0));
-  } else {
-    return _CategoryItem(name: name, icon: Icons.category_outlined,
-        color: _primary, bgColor: const Color(0xFFE8F5E9));
-  }
+  return _CategoryItem(name: name, icon: Icons.category_outlined,
+      color: _primary, bgColor: const Color(0xFFE8F5E9));
 }
 
 class CategoryScreen extends StatefulWidget {
@@ -87,37 +78,23 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
-      body: SafeArea(
+    return Container(
+      color: const Color(0xFFF9FAFB),
+      child: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── App Bar ────────────────────────────────────────────────
+            // ── App Bar (no back button — this is a root tab) ──────────
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: _border),
-                      ),
-                      child: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: _textDark),
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Categories', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: _textDark)),
-                      Text('Browse by product type', style: TextStyle(fontSize: 12, color: _textLight)),
-                    ],
-                  ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text('Categories',
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: _textDark)),
+                  SizedBox(height: 2),
+                  Text('Browse by product type',
+                      style: TextStyle(fontSize: 13, color: _textLight)),
                 ],
               ),
             ),
@@ -144,20 +121,22 @@ class _CategoryScreenState extends State<CategoryScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('All Products', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                          const Text('All Products',
+                              style: TextStyle(color: Colors.white70, fontSize: 12)),
                           const SizedBox(height: 4),
-                          const Text('Browse everything', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800)),
+                          const Text('Browse everything',
+                              style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800)),
                           const SizedBox(height: 12),
                           GestureDetector(
                             onTap: () => Navigator.push(context,
-                              MaterialPageRoute(builder: (_) => const ProductListScreen())),
+                                MaterialPageRoute(builder: (_) => const ProductListScreen())),
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                               decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: const Text('Shop All', style: TextStyle(color: Color(0xFF1B4332), fontSize: 12, fontWeight: FontWeight.w700)),
+                                  color: Colors.white, borderRadius: BorderRadius.circular(20)),
+                              child: const Text('Shop All',
+                                  style: TextStyle(color: Color(0xFF1B4332),
+                                      fontSize: 12, fontWeight: FontWeight.w700)),
                             ),
                           ),
                         ],
@@ -181,7 +160,6 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
             const SizedBox(height: 12),
 
-            // ── Grid ───────────────────────────────────────────────────
             Expanded(
               child: RefreshIndicator(
                 color: _primary,
@@ -203,22 +181,16 @@ class _CategoryScreenState extends State<CategoryScreen> {
     return GridView.builder(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 1.1,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
+        crossAxisCount: 2, childAspectRatio: 1.1,
+        crossAxisSpacing: 12, mainAxisSpacing: 12,
       ),
       itemCount: _categories.length,
       itemBuilder: (_, i) {
         final cat = _mapCategory(_categories[i]);
         return _CategoryCard(
           item: cat,
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => ProductListScreen(category: cat.name),
-            ),
-          ),
+          onTap: () => Navigator.push(context,
+              MaterialPageRoute(builder: (_) => ProductListScreen(category: cat.name))),
         );
       },
     );
@@ -228,21 +200,15 @@ class _CategoryScreenState extends State<CategoryScreen> {
     return GridView.builder(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 1.1,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
+        crossAxisCount: 2, childAspectRatio: 1.1,
+        crossAxisSpacing: 12, mainAxisSpacing: 12,
       ),
       itemCount: 6,
       itemBuilder: (_, __) => Shimmer.fromColors(
         baseColor: const Color(0xFFE0E0E0),
         highlightColor: const Color(0xFFF5F5F5),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-          ),
-        ),
+        child: Container(decoration: BoxDecoration(
+            color: Colors.white, borderRadius: BorderRadius.circular(16))),
       ),
     );
   }
@@ -256,17 +222,16 @@ class _CategoryScreenState extends State<CategoryScreen> {
           children: [
             const Icon(Icons.wifi_off_rounded, size: 52, color: Colors.grey),
             const SizedBox(height: 16),
-            const Text('Failed to load categories', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: _textDark)),
+            const Text('Failed to load categories',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: _textDark)),
             const SizedBox(height: 20),
             ElevatedButton.icon(
               onPressed: _loadCategories,
               icon: const Icon(Icons.refresh_rounded),
               label: const Text('Try Again'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: _primary,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                backgroundColor: _primary, foregroundColor: Colors.white,
+                elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
           ],
@@ -275,14 +240,10 @@ class _CategoryScreenState extends State<CategoryScreen> {
     );
   }
 
-  Widget _buildEmpty() {
-    return const Center(
-      child: Text('No categories found.', style: TextStyle(color: _textLight, fontSize: 14)),
-    );
-  }
+  Widget _buildEmpty() => const Center(
+    child: Text('No categories found.', style: TextStyle(color: _textLight, fontSize: 14)),
+  );
 }
-
-// ─── Category Card ────────────────────────────────────────────────────────────
 
 class _CategoryCard extends StatelessWidget {
   final _CategoryItem item;
@@ -304,24 +265,17 @@ class _CategoryCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: item.bgColor,
-                borderRadius: BorderRadius.circular(16),
-              ),
+              width: 56, height: 56,
+              decoration: BoxDecoration(color: item.bgColor, borderRadius: BorderRadius.circular(16)),
               child: Icon(item.icon, color: item.color, size: 28),
             ),
             const SizedBox(height: 12),
-            Text(
-              item.name,
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: _textDark),
-            ),
+            Text(item.name, textAlign: TextAlign.center, maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: _textDark)),
             const SizedBox(height: 4),
-            Text('View products →', style: TextStyle(fontSize: 11, color: item.color, fontWeight: FontWeight.w600)),
+            Text('View products →',
+                style: TextStyle(fontSize: 11, color: item.color, fontWeight: FontWeight.w600)),
           ],
         ),
       ),

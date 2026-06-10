@@ -1,172 +1,141 @@
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
+import '../../core/theme/app_theme.dart';
 
-class Shimmer extends StatelessWidget {
-  final Widget child;
-  final Color baseColor;
-  final Color highlightColor;
-
-  const Shimmer({
-    super.key,
-    required this.child,
-    required this.baseColor,
-    required this.highlightColor,
-  });
-
-  factory Shimmer.fromColors({
-    required Color baseColor,
-    required Color highlightColor,
-    required Widget child,
-  }) {
-    return Shimmer(
-      baseColor: baseColor,
-      highlightColor: highlightColor,
-      child: child,
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return child;
-  }
-}
-
-class ShimmerProductCard extends StatelessWidget {
-  final double width;
+/// ===============================
+/// SAFE SHIMMER BOX
+/// ===============================
+class ShimmerBox extends StatelessWidget {
+  final double? width;
   final double height;
-  const ShimmerProductCard({super.key, this.width = 140, this.height = 200});
+  final double radius;
+
+  const ShimmerBox({
+    super.key,
+    this.width,
+    required this.height,
+    this.radius = 8,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: const Color(0xFFE0E0E0),
-      highlightColor: const Color(0xFFF5F5F5),
+      baseColor: AppTheme.shimmerBase,
+      highlightColor: AppTheme.shimmerHighlight,
       child: Container(
         width: width,
         height: height,
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Image placeholder
-            Container(
-              width: double.infinity,
-              height: height * 0.6,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  topRight: Radius.circular(16),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: width * 0.7,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Container(
-                    width: width * 0.5,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    width: width * 0.4,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+          color: AppTheme.shimmerBase,
+          borderRadius: BorderRadius.circular(radius),
         ),
       ),
     );
   }
 }
 
-class ShimmerProductGrid extends StatelessWidget {
-  final int count;
-  const ShimmerProductGrid({super.key, this.count = 4});
+/// ===============================
+/// PRODUCT CARD SKELETON
+/// ===============================
+class ProductCardSkeleton extends StatelessWidget {
+  const ProductCardSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: AppTheme.cardDecoration,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const ShimmerBox(
+            height: 140,
+            radius: 16,
+          ),
+
+          const SizedBox(height: 10),
+
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                ShimmerBox(height: 14),
+                SizedBox(height: 6),
+                ShimmerBox(width: 100, height: 12),
+                SizedBox(height: 10),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    ShimmerBox(width: 70, height: 16),
+                    ShimmerBox(width: 36, height: 36, radius: 10),
+                  ],
+                ),
+
+                SizedBox(height: 12),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// ===============================
+/// PRODUCT GRID SKELETON
+/// ===============================
+class ProductGridSkeleton extends StatelessWidget {
+  const ProductGridSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(16),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        childAspectRatio: 0.75,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
+        childAspectRatio: 0.72,
+        mainAxisSpacing: 14,
+        crossAxisSpacing: 14,
       ),
-      itemCount: count,
-      itemBuilder: (_, __) => Shimmer.fromColors(
-        baseColor: const Color(0xFFE0E0E0),
-        highlightColor: const Color(0xFFF5F5F5),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
+      itemCount: 6,
+      itemBuilder: (_, __) => const ProductCardSkeleton(),
+    );
+  }
+}
+
+/// ===============================
+/// CART ITEM SKELETON
+/// ===============================
+class CartItemSkeleton extends StatelessWidget {
+  const CartItemSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      padding: const EdgeInsets.all(12),
+      decoration: AppTheme.cardDecoration,
+      child: Row(
+        children: const [
+          ShimmerBox(width: 72, height: 72, radius: 12),
+          SizedBox(width: 12),
+
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ShimmerBox(height: 14),
+                SizedBox(height: 8),
+                ShimmerBox(width: 80, height: 12),
+                SizedBox(height: 10),
+                ShimmerBox(width: 120, height: 32, radius: 8),
+              ],
+            ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class ShimmerHorizontalList extends StatelessWidget {
-  final int count;
-  const ShimmerHorizontalList({super.key, this.count = 4});
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 200,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        itemCount: count,
-        separatorBuilder: (_, __) => const SizedBox(width: 12),
-        itemBuilder: (_, __) => const ShimmerProductCard(),
-      ),
-    );
-  }
-}
-
-class ShimmerBanner extends StatelessWidget {
-  const ShimmerBanner({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: const Color(0xFFE0E0E0),
-      highlightColor: const Color(0xFFF5F5F5),
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 20),
-        height: 180,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-        ),
+        ],
       ),
     );
   }

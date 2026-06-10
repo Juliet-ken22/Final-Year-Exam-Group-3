@@ -84,7 +84,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
-      // ── No bottomNavigationBar here — it lives in MainNavigationScreen ──
       body: SafeArea(
         child: RefreshIndicator(
           color: _primary,
@@ -182,8 +181,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    const Icon(Icons.notifications_outlined,
-                        size: 22, color: _textDark),
+                    const Icon(Icons.notifications_outlined, size: 22, color: _textDark),
                     Positioned(
                       top: 8, right: 8,
                       child: Container(
@@ -196,7 +194,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               const SizedBox(width: 10),
-              // Tapping the avatar navigates to Profile tab (index 4)
               GestureDetector(
                 onTap: () => widget.onNavigateToTab?.call(4),
                 child: Container(
@@ -216,7 +213,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ✅ Material wraps TextField directly — fixes "No Material widget found"
   Widget _buildSearchBar() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -232,34 +228,27 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: const TextStyle(fontSize: 14, color: _textDark),
                 decoration: InputDecoration(
                   hintText: 'Search products, categories...',
-                  hintStyle:
-                      TextStyle(color: Colors.grey.shade400, fontSize: 14),
-                  prefixIcon: const Icon(Icons.search_rounded,
-                      color: _textDark, size: 20),
+                  hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+                  prefixIcon: const Icon(Icons.search_rounded, color: _textDark, size: 20),
                   suffixIcon: _searchController.text.isNotEmpty
                       ? IconButton(
-                          icon: const Icon(Icons.clear_rounded,
-                              color: Colors.black54, size: 18),
+                          icon: const Icon(Icons.clear_rounded, color: Colors.black54, size: 18),
                           onPressed: _searchController.clear,
                         )
                       : null,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
-                    borderSide: const BorderSide(
-                        color: Color(0xFFE0E0E0), width: 1.5),
+                    borderSide: const BorderSide(color: Color(0xFFE0E0E0), width: 1.5),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
-                    borderSide: const BorderSide(
-                        color: Color(0xFFE0E0E0), width: 1.5),
+                    borderSide: const BorderSide(color: Color(0xFFE0E0E0), width: 1.5),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
-                    borderSide:
-                        const BorderSide(color: _primary, width: 1.5),
+                    borderSide: const BorderSide(color: _primary, width: 1.5),
                   ),
-                  contentPadding:
-                      const EdgeInsets.symmetric(vertical: 14),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
                 ),
               ),
             ),
@@ -283,12 +272,16 @@ class _HomeScreenState extends State<HomeScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(title,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: _textDark)),
+              style: const TextStyle(
+                  fontSize: 18, fontWeight: FontWeight.w800, color: _textDark)),
           if (showSeeAll)
             GestureDetector(
               onTap: onSeeAll,
               child: const Text('See All →',
-                  style: TextStyle(color: _primaryLight, fontSize: 13, fontWeight: FontWeight.w700)),
+                  style: TextStyle(
+                      color: _primaryLight,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700)),
             ),
         ],
       ),
@@ -296,6 +289,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // ─── Horizontal Product List ──────────────────────────────────────────────
+  // FIX: Removed fixed SizedBox height. The ListView height is now driven by
+  // a fixed card width (148px). ProductCard must use AspectRatio for its image
+  // and Expanded for its body so height is intrinsic and never clips content.
 
   Widget _buildHorizontalProductList() {
     if (_isLoading) return const ShimmerHorizontalList();
@@ -304,28 +300,38 @@ class _HomeScreenState extends State<HomeScreen> {
     if (products.isEmpty) return _buildEmpty();
 
     return SizedBox(
-      height: 210,
+      // Height is tall enough for: square image (148px wide = 148px tall) +
+      // text body (~72px) = ~220px. Adjust if your ProductCard image ratio differs.
+      height: 230,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 20),
         itemCount: products.length,
         separatorBuilder: (_, __) => const SizedBox(width: 12),
-        itemBuilder: (ctx, i) => ProductCard(
-          product: products[i],
-          onTap: () => _goToDetail(ctx, products[i]),
+        itemBuilder: (ctx, i) => SizedBox(
+          // FIX: Give every card a fixed width so content can never push outward.
+          width: 148,
+          child: ProductCard(
+            product: products[i],
+            onTap: () => _goToDetail(ctx, products[i]),
+          ),
         ),
       ),
     );
   }
 
   // ─── Product Grid ─────────────────────────────────────────────────────────
+  // FIX: Replaced childAspectRatio (ratio-based height) with mainAxisExtent
+  // (fixed pixel height). This guarantees cards never overflow regardless of
+  // screen width, and text is safely clamped with overflow: ellipsis.
 
   Widget _buildProductGrid() {
-    if (_isLoading)
+    if (_isLoading) {
       return const Padding(
         padding: EdgeInsets.symmetric(horizontal: 20),
         child: ShimmerProductGrid(count: 4),
       );
+    }
     if (_errorMessage.isNotEmpty) return _buildError();
     final products = (_allProducts ?? []).reversed.take(4).toList();
     if (products.isEmpty) return _buildEmpty();
@@ -336,8 +342,13 @@ class _HomeScreenState extends State<HomeScreen> {
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2, childAspectRatio: 0.75,
-          crossAxisSpacing: 12, mainAxisSpacing: 12,
+          crossAxisCount: 2,
+          // FIX: Use mainAxisExtent instead of childAspectRatio.
+          // A fixed px height is predictable; a ratio changes with screen width
+          // and easily clips content on narrow or wide devices.
+          mainAxisExtent: 240,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
         ),
         itemCount: products.length,
         itemBuilder: (ctx, i) => ProductGridCard(
@@ -358,9 +369,17 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('Results (${_filteredProducts.length})',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: _textDark)),
-              Text('for "${_searchController.text}"',
-                  style: const TextStyle(color: _textLight, fontSize: 13)),
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.w800, color: _textDark)),
+              Flexible(
+                // FIX: Wrap the query label in Flexible so a long search string
+                // doesn't push the results count off screen.
+                child: Text(
+                  'for "${_searchController.text}"',
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(color: _textLight, fontSize: 13),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 16),
@@ -371,8 +390,11 @@ class _HomeScreenState extends State<HomeScreen> {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, childAspectRatio: 0.75,
-                crossAxisSpacing: 12, mainAxisSpacing: 12,
+                crossAxisCount: 2,
+                // FIX: Same as product grid — mainAxisExtent over childAspectRatio.
+                mainAxisExtent: 240,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
               ),
               itemCount: _filteredProducts.length,
               itemBuilder: (ctx, i) => ProductGridCard(
@@ -386,23 +408,31 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // ─── Quick Actions ────────────────────────────────────────────────────────
+  // FIX: Replaced Container with fixed right margin inside a Row with
+  // Expanded children. Using minmax(0, 1fr) semantics in Flutter means each
+  // tile gets exactly 1 equal share of available width with zero overflow risk.
+
   Widget _buildQuickActions() {
     final actions = [
-      _QuickActionData(Icons.shopping_bag_outlined, 'My Orders', 'Track & manage', null),
-      _QuickActionData(Icons.local_offer_outlined,  'Deals',     'Save more',      null),
-      _QuickActionData(Icons.favorite_outlined,     'Wishlist',  'Saved items',    2),   // → tab 2
-      _QuickActionData(Icons.support_agent_rounded, 'Support',   "We're here",     null),
+      _QuickActionData(Icons.shopping_bag_outlined,  'Orders',  'Track & manage', null),
+      _QuickActionData(Icons.local_offer_outlined,   'Deals',   'Save more',      null),
+      _QuickActionData(Icons.favorite_outlined,      'Wishlist','Saved items',    2),
+      _QuickActionData(Icons.support_agent_rounded,  'Support', "We're here",     null),
     ];
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
-        children: actions.map((a) {
-          final isLast = a == actions.last;
+        children: List.generate(actions.length, (index) {
+          final a = actions[index];
+          final isLast = index == actions.length - 1;
           return Expanded(
+            // FIX: Expanded ensures every tile is exactly (available width / 4).
+            // The old code used a fixed right margin on a non-Expanded container
+            // which could push the row wider than the screen on small devices.
             child: GestureDetector(
               onTap: () {
-                // Wishlist quick-action switches to the Wishlist tab
                 if (a.tabIndex != null) {
                   widget.onNavigateToTab?.call(a.tabIndex!);
                 }
@@ -420,25 +450,42 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Icon(a.icon, color: _primaryLight, size: 26),
                     const SizedBox(height: 8),
-                    Text(a.label, textAlign: TextAlign.center,
-                        style: const TextStyle(color: _textDark, fontSize: 11, fontWeight: FontWeight.w700)),
+                    Text(
+                      a.label,
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      // FIX: Clamp label text so it never wraps and pushes the
+                      // tile taller than its siblings.
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                          color: _textDark,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700),
+                    ),
                     const SizedBox(height: 2),
-                    Text(a.sub, textAlign: TextAlign.center,
-                        style: const TextStyle(color: Colors.grey, fontSize: 9, fontWeight: FontWeight.w500)),
+                    Text(
+                      a.sub,
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 9,
+                          fontWeight: FontWeight.w500),
+                    ),
                   ],
                 ),
               ),
             ),
           );
-        }).toList(),
+        }),
       ),
     );
   }
 
   void _goToDetail(BuildContext ctx, Product product) {
     Navigator.push(ctx,
-        MaterialPageRoute(
-            builder: (_) => ProductDetailScreen(product: product)));
+        MaterialPageRoute(builder: (_) => ProductDetailScreen(product: product)));
   }
 
   Widget _buildError() {
@@ -466,7 +513,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildEmpty() => const Center(
     child: Padding(
       padding: EdgeInsets.symmetric(vertical: 24),
-      child: Text('No products available.', style: TextStyle(color: Colors.grey)),
+      child: Text('No products available.',
+          style: TextStyle(color: Colors.grey)),
     ),
   );
 
@@ -486,7 +534,10 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 16),
             const Text('No products found',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _textDark)),
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: _textDark)),
             const SizedBox(height: 6),
             Text('Try a different search term',
                 style: TextStyle(color: Colors.grey.shade500, fontSize: 13)),

@@ -8,6 +8,7 @@ class Product {
   final double? rating;
   final int? reviewCount;
   final bool inStock;
+  final double? price;
 
   Product({
     required this.id,
@@ -19,29 +20,21 @@ class Product {
     this.rating,
     this.reviewCount,
     this.inStock = true,
+    this.price,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
-      id: json['id'],
-      name: json['name'],
-      formattedPrice: json['formatted_price'] ?? '',
-      image: json['main_image'],
-      description: json['short_description'],
-      category: json['category']?['name'],
-      rating: double.tryParse(json['rating']?.toString() ?? ''),
+      id: json['id'] ?? 0,
+      name: json['name'] ?? '',
+      formattedPrice: json['formatted_price'] ?? '\$0.00',
+      image: json['main_image'] ?? json['image'],
+      description: json['short_description'] ?? json['description'],
+      category: json['category']?['name'] ?? json['category'],
+      rating: json['rating'] != null ? double.tryParse(json['rating'].toString()) : null,
       reviewCount: json['review_count'] ?? json['reviews_count'],
       inStock: json['in_stock'] ?? json['stock'] != 0,
+      price: json['price'] != null ? double.tryParse(json['price'].toString()) : null,
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'formatted_price': formattedPrice,
-      'main_image': image,
-      'short_description': description,
-    };
   }
 }

@@ -86,48 +86,48 @@ class _CategoryScreenState extends State<CategoryScreen> {
           children: [
             // ── App Bar ────────────────────────────────────────────────
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
               child: Row(
                 children: [
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
                     child: Container(
-                      padding: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(7),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(color: _border),
                       ),
-                      child: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: _textDark),
+                      child: const Icon(Icons.arrow_back_ios_new_rounded, size: 16, color: _textDark),
                     ),
                   ),
-                  const SizedBox(width: 14),
+                  const SizedBox(width: 12),
                   const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Categories', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: _textDark)),
-                      Text('Browse by product type', style: TextStyle(fontSize: 12, color: _textLight)),
+                      Text('Categories', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: _textDark)),
+                      Text('Browse by product type', style: TextStyle(fontSize: 11, color: _textLight)),
                     ],
                   ),
                 ],
               ),
             ),
 
-          const SizedBox(height: 20),
+            const SizedBox(height: 16),
 
             // ── Featured Banner ────────────────────────────────────────
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [Color(0xFF1B4332), Color(0xFF2D6A4F)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: Row(
                   children: [
@@ -135,49 +135,49 @@ class _CategoryScreenState extends State<CategoryScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('All Products', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                          const Text('All Products', style: TextStyle(color: Colors.white70, fontSize: 11)),
                           const SizedBox(height: 4),
-                          const Text('Browse everything', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800)),
-                          const SizedBox(height: 12),
+                          const Text('Browse everything', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w800)),
+                          const SizedBox(height: 10),
                           GestureDetector(
                             onTap: () => Navigator.push(context,
                               MaterialPageRoute(builder: (_) => const ProductListScreen())),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(20),
                               ),
-                              child: const Text('Shop All', style: TextStyle(color: Color(0xFF1B4332), fontSize: 12, fontWeight: FontWeight.w700)),
+                              child: const Text('Shop All', style: TextStyle(color: Color(0xFF1B4332), fontSize: 11, fontWeight: FontWeight.w700)),
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const Text('🛍️', style: TextStyle(fontSize: 52)),
+                    const Text('🛍️', style: TextStyle(fontSize: 44)),
                   ],
                 ),
               ),
             ),
 
-          const SizedBox(height: 24),
+            const SizedBox(height: 20),
 
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Text(
-              _isLoading
-                  ? 'Loading categories...'
-                  : '${_categories.length} categories',
-              style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: _textLight),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                _isLoading
+                    ? 'Loading categories...'
+                    : '${_categories.length} categories',
+                style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: _textLight),
+              ),
             ),
-          ),
 
-          const SizedBox(height: 12),
+            const SizedBox(height: 10),
 
-            // ── Grid ───────────────────────────────────────────────────
+            // ── Grid ── 3 COLUMNS WITH SMALLER CARDS ───────────────────
             Expanded(
               child: RefreshIndicator(
                 color: _primary,
@@ -197,10 +197,12 @@ class _CategoryScreenState extends State<CategoryScreen> {
     if (_categories.isEmpty) return _buildEmpty();
 
     return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+      padding: const EdgeInsets.fromLTRB(12, 0, 12, 20),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2, childAspectRatio: 1.1,
-        crossAxisSpacing: 12, mainAxisSpacing: 12,
+        crossAxisCount: 3, // Changed to 3 columns
+        childAspectRatio: 0.85, // Adjusted for smaller cards
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
       ),
       itemCount: _categories.length,
       itemBuilder: (_, i) {
@@ -216,17 +218,23 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
   Widget _buildShimmer() {
     return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+      padding: const EdgeInsets.fromLTRB(12, 0, 12, 20),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2, childAspectRatio: 1.1,
-        crossAxisSpacing: 12, mainAxisSpacing: 12,
+        crossAxisCount: 3,
+        childAspectRatio: 0.85,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
       ),
-      itemCount: 6,
+      itemCount: 9,
       itemBuilder: (_, __) => Shimmer.fromColors(
         baseColor: const Color(0xFFE0E0E0),
         highlightColor: const Color(0xFFF5F5F5),
-        child: Container(decoration: BoxDecoration(
-            color: Colors.white, borderRadius: BorderRadius.circular(16))),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
       ),
     );
   }
@@ -266,7 +274,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
   }
 }
 
-// ─── Category Card ────────────────────────────────────────────────────────────
+// ─── SMALLER CATEGORY CARD (3 columns) ────────────────────────────────────────
 
 class _CategoryCard extends StatelessWidget {
   final _CategoryItem item;
@@ -280,33 +288,54 @@ class _CategoryCard extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFE0E0E0), width: 1.5),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFE0E0E0), width: 0.8),
           boxShadow: [
             BoxShadow(
-                color: Colors.black.withOpacity(0.03),
-                blurRadius: 8,
-                offset: const Offset(0, 4))
+                color: Colors.black.withOpacity(0.02),
+                blurRadius: 4,
+                offset: const Offset(0, 2))
           ],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // SMALLER ICON CONTAINER
             Container(
-              width: 56, height: 56,
-              decoration: BoxDecoration(color: item.bgColor, borderRadius: BorderRadius.circular(16)),
-              child: Icon(item.icon, color: item.color, size: 28),
+              width: 45,
+              height: 45,
+              decoration: BoxDecoration(
+                color: item.bgColor,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                item.icon,
+                color: item.color,
+                size: 24,
+              ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
+            // SMALLER TEXT
             Text(
               item.name,
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: _textDark),
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: _textDark,
+              ),
             ),
-            const SizedBox(height: 4),
-            Text('View products →', style: TextStyle(fontSize: 11, color: item.color, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 3),
+            Text(
+              'View →',
+              style: TextStyle(
+                fontSize: 9,
+                color: item.color,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ],
         ),
       ),

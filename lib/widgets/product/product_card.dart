@@ -80,9 +80,9 @@ class ProductCard extends StatelessWidget {
                 child: SizedBox(
                   width: double.infinity,
                   height: 100,
-                  child: product.image != null
+                  child: product.imageUrl != null
                       ? Image.network(
-                          product.image!,
+                          product.imageUrl!,
                           fit: BoxFit.cover,
                           loadingBuilder: (_, child, p) => p == null
                               ? child
@@ -284,9 +284,9 @@ class ProductGridCard extends StatelessWidget {
               child: SizedBox(
                 width: double.infinity,
                 height: 100,
-                child: product.image != null
+                child: product.imageUrl != null
                     ? Image.network(
-                        product.image!,
+                        product.imageUrl!,
                         fit: BoxFit.cover,
                         loadingBuilder: (_, child, p) => p == null
                             ? child

@@ -333,7 +333,7 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
     if (_errorMessage.isNotEmpty) return _buildError();
-    final products = (_allProducts ?? []).reversed.take(4).toList();
+    final products = (_allProducts ?? []).reversed.take(6).toList();
     if (products.isEmpty) return _buildEmpty();
 
     return Padding(

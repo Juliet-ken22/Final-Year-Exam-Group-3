@@ -23,6 +23,16 @@ class Product {
     this.price,
   });
 
+  String? get imageUrl {
+    final raw = image?.trim();
+    if (raw == null || raw.isEmpty) return null;
+
+    final uri = Uri.tryParse(raw);
+    if (uri != null && uri.hasScheme) return raw;
+
+    return 'https://admin.rasmuspharmaceuticals.com/$raw';
+  }
+
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
       id: json['id'] ?? 0,

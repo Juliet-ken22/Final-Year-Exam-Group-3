@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 import '../common/shimmer_widgets.dart';
 
 class CategoryShimmer extends StatelessWidget {
